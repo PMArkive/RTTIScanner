@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vsix_demo1", "vsix_demo1.csproj", "{F8840E1D-A705-4884-B14E-D63C0741A045}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTTIScanner", "RTTIScanner.csproj", "{F8840E1D-A705-4884-B14E-D63C0741A045}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

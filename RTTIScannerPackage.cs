@@ -4,14 +4,15 @@ global using System;
 global using Task = System.Threading.Tasks.Task;
 using System.Runtime.InteropServices;
 using System.Threading;
+using RTTIScanner;
 
-namespace vsix_demo1
+namespace RTTIScanner
 {
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [InstalledProductRegistration(Vsix.Name, Vsix.Description, Vsix.Version)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
-    [Guid(PackageGuids.vsix_demo1String)]
-    public sealed class vsix_demo1Package : ToolkitPackage
+    [Guid(PackageGuids.RTTIScannerString)]
+    public sealed class RTTIScannerPackage : ToolkitPackage
     {
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {

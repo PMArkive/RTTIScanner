@@ -1,6 +1,7 @@
-
+.vs
 *.dll
 *.pdb
 *.vsix
 **/Release
 obj
+bin

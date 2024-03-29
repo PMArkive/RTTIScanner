@@ -6,9 +6,9 @@
   <Include href="KnownImageIds.vsct"/>
   <Include href="VSGlobals.vsct"/>
 
-  <Commands package="vsix_demo1">
+  <Commands package="RTTIScanner">
     <Groups>
-      <Group guid="vsix_demo1" id="MyMenuGroup" priority="0x0600">
+      <Group guid="RTTIScanner" id="MenuGroup" priority="0x0600">
         <Parent guid="VSMainMenu" id="Tools"/>
       </Group>
     </Groups>
@@ -16,22 +16,22 @@
     <!--This section defines the elements the user can interact with, like a menu command or a button
         or combo box in a toolbar. -->
     <Buttons>
-      <Button guid="vsix_demo1" id="MyCommand" priority="0x0100" type="Button">
-        <Parent guid="vsix_demo1" id="MyMenuGroup" />
+      <Button guid="RTTIScanner" id="Window" priority="0x0100" type="Button">
+        <Parent guid="RTTIScanner" id="MenuGroup" />
         <Icon guid="ImageCatalogGuid" id="StatusInformation" />
         <CommandFlag>IconIsMoniker</CommandFlag>
         <Strings>
-          <ButtonText>My Command</ButtonText>
-          <LocCanonicalName>.vsix_demo1.MyCommand</LocCanonicalName>
+          <ButtonText>RTTIScanner</ButtonText>
+          <LocCanonicalName>.RTTIScanner.Window</LocCanonicalName>
         </Strings>
       </Button>
     </Buttons>
   </Commands>
 
   <Symbols>
-    <GuidSymbol name="vsix_demo1" value="{12319018-ba33-41c3-babc-e08c59074ae1}">
-      <IDSymbol name="MyMenuGroup" value="0x0001" />
-      <IDSymbol name="MyCommand" value="0x0100" />
+    <GuidSymbol name="RTTIScanner" value="{12319018-ba33-41c3-babc-e08c59074ae1}">
+      <IDSymbol name="MenuGroup" value="0x0001" />
+      <IDSymbol name="Window" value="0x0100" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

@@ -1,8 +1,9 @@
 ﻿using System.Runtime.InteropServices;
+using System.Text;
 
-namespace vsix_demo1
+namespace RTTIScanner.Commands
 {
-    public static class Win32API
+    public static class NativeAPI
     {
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern IntPtr VirtualAlloc(IntPtr lpAddress, uint dwSize, uint flAllocationType, uint flProtect);
@@ -18,5 +19,8 @@ namespace vsix_demo1
 
         [DllImport("kernel32.dll")]
         public static extern bool IsDebuggerPresent();
+
+        [DllImport("dbghelp.dll", CharSet = CharSet.Unicode)]
+        public static extern int UnDecorateSymbolName(string DecoratedName, StringBuilder UnDecoratedName, int UndecoratedLength, int Flags);
     }
 }
