@@ -1,0 +1,6 @@
+
+*.dll
+*.pdb
+*.vsix
+**/Release
+obj
