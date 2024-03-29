@@ -1,9 +1,9 @@
-﻿using System.Windows.Forms;
-using System.Reflection;
-using System.Drawing;
-using EnvDTE;
+﻿using EnvDTE;
 using EnvDTE80;
 using RTTIScanner.ClassExtensions;
+using System.Drawing;
+using System.Reflection;
+using System.Windows.Forms;
 
 
 namespace RTTIScanner.Commands
@@ -14,7 +14,9 @@ namespace RTTIScanner.Commands
         public static RTTIScannerImpl Instance { get; private set; }
         private TextBox AddressInputBox;
         private TextBox RTTIShowBox;
-        
+        private Form toolWindow;
+
+
         protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
         {
             await Package.JoinableTaskFactory.SwitchToMainThreadAsync();
@@ -34,6 +36,7 @@ namespace RTTIScanner.Commands
             RTTIShowBox.Dock = DockStyle.Fill;
             RTTIShowBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             RTTIShowBox.Font = new Font("Consolas", 12, FontStyle.Regular); // 设置字体
+            RTTIShowBox.TextChanged += RTTIShowBox_TextChanged;
 
             var tableLayoutPanel = new TableLayoutPanel();
             tableLayoutPanel.RowCount = 2;
@@ -42,11 +45,12 @@ namespace RTTIScanner.Commands
             tableLayoutPanel.Controls.Add(AddressInputBox, 0, 0);
             tableLayoutPanel.Controls.Add(RTTIShowBox, 0, 1);
 
-            var toolWindow = new Form();
+            toolWindow = new Form();
             toolWindow.Text = "RTTI Scanner";
             string projectName = Assembly.GetExecutingAssembly().GetName().Name.ToString();
             toolWindow.Icon = new Icon(Assembly.GetExecutingAssembly().GetManifestResourceStream(projectName + ".Resources" + ".ReClass.ico"));
             toolWindow.Controls.Add(tableLayoutPanel);
+            toolWindow.TopMost = true;
 
             toolWindow.Show();
         }
@@ -73,27 +77,47 @@ namespace RTTIScanner.Commands
                 }
 
                 IntPtr pointer = await RemoteProcess.ParseAddressAsync(context);
-                if (pointer == IntPtr.Zero || !pointer.MayBeValid())
+                if (!pointer.MayBeValid())
                 {
+                    await VS.MessageBox.ShowWarningAsync("指针不合法!");
                     return;
                 }
 
-                byte[] data = await RemoteProcess.Instance.ReadRemoteMemoryAsync(pointer, 8);
-                IntPtr remotePtr = (IntPtr)BitConverter.ToInt64(data, 0);
-                string rtti = await RTTIParser.ReadRemoteRuntimeTypeInformationAsync(remotePtr);
-                if (string.IsNullOrEmpty(rtti))
+                try
                 {
-                    await VS.MessageBox.ShowWarningAsync("获取RTTI信息失败!");
-                    return;
-                }
+                    byte[] data = await RemoteProcess.Instance.ReadRemoteMemoryAsync(pointer, 8);
+                    IntPtr remotePtr = (IntPtr)BitConverter.ToInt64(data, 0);
+                    string rtti = await RTTIParser.ReadRemoteRuntimeTypeInformationAsync(remotePtr);
+                    if (string.IsNullOrEmpty(rtti))
+                    {
+                        await VS.MessageBox.ShowWarningAsync("获取RTTI信息失败!");
+                        return;
+                    }
 
-                string[] rttis = rtti.Split(separator: new char[]{':'}, StringSplitOptions.RemoveEmptyEntries);
-                RTTIShowBox.Clear();
-                foreach (string className in rttis)
+                    string[] rttis = rtti.Split(separator: new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                    RTTIShowBox.Clear();
+                    foreach (string className in rttis)
+                    {
+                        AppendResult(className);
+                    }
+                }
+                catch (Exception ex)
                 {
-                    AppendResult(className);
+                    await VS.MessageBox.ShowWarningAsync($"Catched error reading process memory: {ex.Message}");
                 }
             }
+        }
+
+        private void RTTIShowBox_TextChanged(object sender, EventArgs e)
+        {
+            // 获取 RTTIShowBox 的最佳大小
+            var preferredSize = RTTIShowBox.GetPreferredSize(new Size(int.MaxValue, int.MaxValue));
+
+            // 设置工具窗口的大小
+            toolWindow.Size = new Size(
+                Math.Max(toolWindow.Width, preferredSize.Width + 20), // 宽度加上一些边距
+                Math.Max(toolWindow.Height, preferredSize.Height + 20) // 高度加上一些边距
+            );
         }
 
         public void AppendResult(string text)

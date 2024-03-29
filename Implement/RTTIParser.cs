@@ -1,7 +1,7 @@
-﻿using System.Diagnostics.Contracts;
+﻿using RTTIScanner.ClassExtensions;
+using System.Diagnostics.Contracts;
 using System.Text;
 using System.Threading.Tasks;
-using RTTIScanner.ClassExtensions;
 
 namespace RTTIScanner.Commands
 {
@@ -11,19 +11,27 @@ namespace RTTIScanner.Commands
         {
             if (address.MayBeValid())
             {
-                string rtti = null;
-                var objectLocatorPtr = await ReadRemoteIntPtrAsync(address - IntPtr.Size);
-                if (objectLocatorPtr.MayBeValid())
+                try
                 {
+                    string rtti = null;
+                    var objectLocatorPtr = await ReadRemoteIntPtrAsync(address - IntPtr.Size);
+                    if (objectLocatorPtr.MayBeValid())
+                    {
 #if RTTISCANNER64
-					rtti = await ReadRemoteRuntimeTypeInformation64Async(objectLocatorPtr);
+                        rtti = await ReadRemoteRuntimeTypeInformation64Async(objectLocatorPtr);
 #else
                     //rtti = ReadRemoteRuntimeTypeInformation32Async(objectLocatorPtr);
 #endif
 
-                }
+                    }
 
-                return rtti;
+                    return rtti;
+                }
+                catch (Exception ex)
+                {
+                    await VS.MessageBox.ShowWarningAsync($"Catched error reading process memory: {ex.Message}");
+                    return null;
+                }
             }
 
             return null;
@@ -31,70 +39,78 @@ namespace RTTIScanner.Commands
 
         public static async Task<string> ReadRemoteRuntimeTypeInformation64Async(IntPtr address)
         {
-            if (address.MayBeValid())
+            try
             {
-                int baseOffset = await ReadRemoteInt32Async(address + 0x14);
-                if (baseOffset != 0)
+                if (address.MayBeValid())
                 {
-                    var baseAddress = address - baseOffset;
-
-                    var classHierarchyDescriptorOffset = await ReadRemoteInt32Async(address + 0x10);
-                    if (classHierarchyDescriptorOffset != 0)
+                    int baseOffset = await ReadRemoteInt32Async(address + 0x14);
+                    if (baseOffset != 0)
                     {
-                        var classHierarchyDescriptorPtr = baseAddress + classHierarchyDescriptorOffset;
+                        var baseAddress = address - baseOffset;
 
-                        var baseClassCount = await ReadRemoteInt32Async(classHierarchyDescriptorPtr + 0x08);
-                        if (baseClassCount > 0 && baseClassCount < 25)
+                        var classHierarchyDescriptorOffset = await ReadRemoteInt32Async(address + 0x10);
+                        if (classHierarchyDescriptorOffset != 0)
                         {
-                            var baseClassArrayOffset = await ReadRemoteInt32Async(classHierarchyDescriptorPtr + 0x0C);
-                            if (baseClassArrayOffset != 0)
+                            var classHierarchyDescriptorPtr = baseAddress + classHierarchyDescriptorOffset;
+
+                            var baseClassCount = await ReadRemoteInt32Async(classHierarchyDescriptorPtr + 0x08);
+                            if (baseClassCount > 0 && baseClassCount < 25)
                             {
-                                var baseClassArrayPtr = baseAddress + baseClassArrayOffset;
-
-                                var sb = new StringBuilder();
-                                for (var i = 0; i < baseClassCount; ++i)
+                                var baseClassArrayOffset = await ReadRemoteInt32Async(classHierarchyDescriptorPtr + 0x0C);
+                                if (baseClassArrayOffset != 0)
                                 {
-                                    var baseClassDescriptorOffset = await ReadRemoteInt32Async(baseClassArrayPtr + (4 * i));
-                                    if (baseClassDescriptorOffset != 0)
+                                    var baseClassArrayPtr = baseAddress + baseClassArrayOffset;
+
+                                    var sb = new StringBuilder();
+                                    for (var i = 0; i < baseClassCount; ++i)
                                     {
-                                        var baseClassDescriptorPtr = baseAddress + baseClassDescriptorOffset;
-
-                                        var typeDescriptorOffset = await ReadRemoteInt32Async(baseClassDescriptorPtr);
-                                        if (typeDescriptorOffset != 0)
+                                        var baseClassDescriptorOffset = await ReadRemoteInt32Async(baseClassArrayPtr + (4 * i));
+                                        if (baseClassDescriptorOffset != 0)
                                         {
-                                            var typeDescriptorPtr = baseAddress + typeDescriptorOffset;
+                                            var baseClassDescriptorPtr = baseAddress + baseClassDescriptorOffset;
 
-                                            var name = await ReadRemoteStringUntilFirstNullCharacterAsync(typeDescriptorPtr + 0x14, Encoding.UTF8, 60);
-                                            if (string.IsNullOrEmpty(name))
+                                            var typeDescriptorOffset = await ReadRemoteInt32Async(baseClassDescriptorPtr);
+                                            if (typeDescriptorOffset != 0)
                                             {
-                                                break;
+                                                var typeDescriptorPtr = baseAddress + typeDescriptorOffset;
+
+                                                var name = await ReadRemoteStringUntilFirstNullCharacterAsync(typeDescriptorPtr + 0x14, Encoding.UTF8, 60);
+                                                if (string.IsNullOrEmpty(name))
+                                                {
+                                                    break;
+                                                }
+
+                                                if (name.EndsWith("@@"))
+                                                {
+                                                    name = UndecorateSymbolName("?" + name);
+                                                }
+
+                                                sb.Append(name);
+                                                sb.Append(" : ");
+
+                                                continue;
                                             }
-
-                                            if (name.EndsWith("@@"))
-                                            {
-                                                name = UndecorateSymbolName("?" + name);
-                                            }
-
-                                            sb.Append(name);
-                                            sb.Append(" : ");
-
-                                            continue;
                                         }
+
+                                        break;
                                     }
 
-                                    break;
-                                }
+                                    if (sb.Length != 0)
+                                    {
+                                        sb.Length -= 3;
 
-                                if (sb.Length != 0)
-                                {
-                                    sb.Length -= 3;
-
-                                    return sb.ToString();
+                                        return sb.ToString();
+                                    }
                                 }
                             }
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                await VS.MessageBox.ShowWarningAsync($"Catched error reading process memory: {ex.Message}");
+                return null;
             }
 
             return null;
@@ -102,25 +118,49 @@ namespace RTTIScanner.Commands
 
         public static async Task<IntPtr> ReadRemoteIntPtrAsync(IntPtr address)
         {
+            try
+            {
 #if RTTISCANNER64
-            return (IntPtr) await ReadRemoteInt64Async(address);
+                return (IntPtr)await ReadRemoteInt64Async(address);
 #else
-            return (IntPtr) await ReadRemoteInt32Async(address);
+                return (IntPtr)await ReadRemoteInt32Async(address);
 #endif
+            }
+            catch (Exception ex)
+            {
+                await VS.MessageBox.ShowWarningAsync($"Catched error reading process memory: {ex.Message}");
+                return IntPtr.Zero;
+            }
         }
 
         public static async Task<long> ReadRemoteInt64Async(IntPtr address)
         {
-            var data = await RemoteProcess.Instance.ReadRemoteMemoryAsync(address, sizeof(long));
+            try
+            {
+                var data = await RemoteProcess.Instance.ReadRemoteMemoryAsync(address, sizeof(long));
 
-            return BitConverter.ToInt64(data, 0);
+                return BitConverter.ToInt64(data, 0);
+            }
+            catch (Exception ex)
+            {
+                await VS.MessageBox.ShowWarningAsync($"Catched error reading process memory: {ex.Message}");
+                return 0;
+            }
         }
 
         public static async Task<int> ReadRemoteInt32Async(IntPtr address)
         {
-            var data = await RemoteProcess.Instance.ReadRemoteMemoryAsync(address, sizeof(int));
+            try
+            {
+                var data = await RemoteProcess.Instance.ReadRemoteMemoryAsync(address, sizeof(int));
 
-            return BitConverter.ToInt32(data, 0);
+                return BitConverter.ToInt32(data, 0);
+            }
+            catch (Exception ex)
+            {
+                await VS.MessageBox.ShowWarningAsync($"Catched error reading process memory: {ex.Message}");
+                return 0;
+            }
         }
 
         public static async Task<string> ReadRemoteStringUntilFirstNullCharacterAsync(IntPtr address, Encoding encoding, int length)

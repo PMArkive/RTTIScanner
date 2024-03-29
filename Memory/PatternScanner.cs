@@ -1,6 +1,6 @@
-﻿using System.Diagnostics.Contracts;
+﻿using RTTIScanner.Memory;
+using System.Diagnostics.Contracts;
 using System.Threading.Tasks;
-using RTTIScanner.Memory;
 using Section = RTTIScanner.Memory.Section;
 
 namespace RTTIScanner.Commands

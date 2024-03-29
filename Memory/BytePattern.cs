@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using RTTIScanner.ClassExtensions;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Text;
-using RTTIScanner.ClassExtensions;
-using System.Threading.Tasks;
 
 namespace RTTIScanner.Commands
 {

@@ -1,6 +1,6 @@
-﻿using System.Reflection;
+﻿using RTTIScanner;
+using System.Reflection;
 using System.Runtime.InteropServices;
-using RTTIScanner;
 
 [assembly: AssemblyTitle(Vsix.Name)]
 [assembly: AssemblyDescription(Vsix.Description)]
