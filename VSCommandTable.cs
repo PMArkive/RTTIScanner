@@ -14,6 +14,9 @@ namespace RTTIScanner
     {
         public const string RTTIScannerString = "12319018-ba33-41c3-babc-e08c59074ae1";
         public static Guid RTTIScanner = new Guid(RTTIScannerString);
+
+        public const string RTTIScannerToolIconString = "00b1cb59-d3e0-4cac-a91a-939470b92d0b";
+        public static Guid RTTIScannerToolIcon = new Guid(RTTIScannerToolIconString);
     }
     /// <summary>
     /// Helper class that encapsulates all CommandIDs uses across VS Package.
@@ -22,5 +25,6 @@ namespace RTTIScanner
     {
         public const int MenuGroup = 0x0001;
         public const int Window = 0x0100;
+        public const int ReClass = 0x0001;
     }
 }

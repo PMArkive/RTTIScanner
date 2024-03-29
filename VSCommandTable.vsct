@@ -9,8 +9,8 @@
   <Commands package="RTTIScanner">
     <Groups>
       <Group guid="RTTIScanner" id="MenuGroup" priority="0x0600">
-        <Parent guid="VSMainMenu" id="Tools"/>
-      </Group>
+		  <Parent guid="VSMainMenu" id="Tools"/>
+	  </Group>
     </Groups>
 
     <!--This section defines the elements the user can interact with, like a menu command or a button
@@ -18,11 +18,11 @@
     <Buttons>
       <Button guid="RTTIScanner" id="Window" priority="0x0100" type="Button">
         <Parent guid="RTTIScanner" id="MenuGroup" />
-        <Icon guid="ImageCatalogGuid" id="StatusInformation" />
+	    <Icon guid="RTTIScannerToolIcon" id="ReClass" />
         <CommandFlag>IconIsMoniker</CommandFlag>
         <Strings>
-          <ButtonText>RTTIScanner</ButtonText>
-          <LocCanonicalName>.RTTIScanner.Window</LocCanonicalName>
+            <ButtonText>RTTI Scanner</ButtonText>
+            <LocCanonicalName>.RTTIScanner.Window</LocCanonicalName>
         </Strings>
       </Button>
     </Buttons>
@@ -30,8 +30,11 @@
 
   <Symbols>
     <GuidSymbol name="RTTIScanner" value="{12319018-ba33-41c3-babc-e08c59074ae1}">
-      <IDSymbol name="MenuGroup" value="0x0001" />
-      <IDSymbol name="Window" value="0x0100" />
+        <IDSymbol name="MenuGroup" value="0x0001" />
+        <IDSymbol name="Window" value="0x0100" />
     </GuidSymbol>
+	<GuidSymbol name="RTTIScannerToolIcon" value="{00b1cb59-d3e0-4cac-a91a-939470b92d0b}">
+		<IDSymbol name="ReClass" value="1" />
+	</GuidSymbol>
   </Symbols>
 </CommandTable>
