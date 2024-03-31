@@ -14,10 +14,10 @@ namespace RTTIScanner
     [Guid(PackageGuids.RTTIScannerString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [InstalledProductRegistration(Vsix.Name, Vsix.Description, Vsix.Version)]
-    [ProvideAutoLoad(UIContextGuids80.NoSolution)]
-    [ProvideAutoLoad(UIContextGuids80.SolutionBuilding)]
-    [ProvideAutoLoad(UIContextGuids80.Debugging)]
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
+    [ProvideAutoLoad(UIContextGuids80.NoSolution)] // sync autoload will be deprecated in the future
+    [ProvideAutoLoad(UIContextGuids80.SolutionBuilding)] // but at least it works perfects now
+    [ProvideAutoLoad(UIContextGuids80.Debugging)] // i have no idea at now.
     public sealed class RTTIScannerPackage : ToolkitPackage
     {
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)

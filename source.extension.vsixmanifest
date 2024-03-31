@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="RTTIScanner.117c5265-e011-4e02-a87e-bae810f59ad7" Version="1.0" Language="en-US" Publisher="Anie1337" />
+        <Identity Id="RTTIScanner.117c5265-e011-4e02-a87e-bae810f59ad7" Version="1.1" Language="en-US" Publisher="Anie1337" />
         <DisplayName>RTTIScanner</DisplayName>
         <Description xml:space="preserve">A visual studio extension that scans the RTTI of given memory.</Description>
         <Icon>Resources\Icon.png</Icon>

@@ -12,7 +12,7 @@ namespace RTTIScanner.Implement
             string expression = "0x" + pointer.ToString("X");
             if (DebuggerIfaces.Instance.mainThread == null)
             {
-                await VS.MessageBox.ShowWarningAsync("获取主线程失败!");
+                await VS.MessageBox.ShowWarningAsync("获取主线程失败!\n(这通常发生在扩展初始化晚于调试器启动, 请重启VS!)");
                 return null;
             }
 
