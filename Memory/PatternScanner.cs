@@ -3,7 +3,7 @@ using System.Diagnostics.Contracts;
 using System.Threading.Tasks;
 using Section = RTTIScanner.Memory.Section;
 
-namespace RTTIScanner.Commands
+namespace RTTIScanner.Impl
 {
     public class PatternScanner
     {

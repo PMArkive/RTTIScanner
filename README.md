@@ -5,4 +5,4 @@
 # Feature
 
 * Scan RTTI in normal debug mode.
-* Analyze RTTI while visual studio debuging minidump file(TODO).
+* Analyze RTTI while visual studio debuging minidump file.

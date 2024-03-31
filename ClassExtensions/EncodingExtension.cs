@@ -23,7 +23,7 @@ namespace RTTIScanner.ClassExtensions
                 return 4;
             }
 
-            throw new NotImplementedException();
+            return 0;
         }
 
         /// <summary>

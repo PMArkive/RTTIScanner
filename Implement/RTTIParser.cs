@@ -3,7 +3,7 @@ using System.Diagnostics.Contracts;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RTTIScanner.Commands
+namespace RTTIScanner.Impl
 {
     public class RTTIParser
     {
@@ -20,7 +20,7 @@ namespace RTTIScanner.Commands
 #if RTTISCANNER64
                         rtti = await ReadRemoteRuntimeTypeInformation64Async(objectLocatorPtr);
 #else
-                    //rtti = ReadRemoteRuntimeTypeInformation32Async(objectLocatorPtr);
+                        //rtti = ReadRemoteRuntimeTypeInformation32Async(objectLocatorPtr);
 #endif
 
                     }
