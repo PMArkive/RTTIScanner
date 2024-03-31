@@ -2,10 +2,10 @@
 
  A visual studio extension that scan the RTTI of given memory.
 
-# Feature
+# Supports
 
-* Scan RTTI on visual studio debugging.
-* Analyze RTTI while visual studio debugging minidump file.
+* Any c++ 64bit application.
+* Minidump file.
 
 # Warning
 

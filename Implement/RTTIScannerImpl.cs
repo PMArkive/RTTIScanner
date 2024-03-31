@@ -5,8 +5,6 @@ using System.Reflection;
 using System.Windows.Forms;
 using RTTIScanner.ClassExtensions;
 using RTTIScanner.Implement;
-using Microsoft.VisualStudio.Debugger.Interop;
-using Microsoft.VisualStudio;
 
 
 namespace RTTIScanner.Impl
@@ -123,8 +121,6 @@ namespace RTTIScanner.Impl
                 }
             }
         }
-
-        
 
         private void RTTIShowBox_OnTextChanged(object sender, EventArgs e)
         {
