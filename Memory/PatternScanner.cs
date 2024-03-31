@@ -3,7 +3,7 @@ using System.Diagnostics.Contracts;
 using System.Threading.Tasks;
 using Section = RTTIScanner.Memory.Section;
 
-namespace RTTIScanner.Impl
+namespace RTTIScanner.Implement
 {
     public class PatternScanner
     {
@@ -14,13 +14,13 @@ namespace RTTIScanner.Impl
         /// <param name="process">The process to read from.</param>
         /// <param name="module">The module of the process.</param>
         /// <returns>The address of the pattern or <see cref="IntPtr.Zero"/> if the pattern was not found.</returns>
-        public static async Task<IntPtr> FindPatternAsync(BytePattern pattern, RemoteProcess process, Module module)
+        public static IntPtr FindPattern(BytePattern pattern, RemoteProcess process, Module module)
         {
             Contract.Requires(pattern != null);
             Contract.Requires(process != null);
             Contract.Requires(module != null);
 
-            return await FindPatternAsync(pattern, process, module.Start, module.Size.ToInt32());
+            return FindPattern(pattern, process, module.Start, module.Size.ToInt32());
         }
 
         /// <summary>
@@ -30,13 +30,13 @@ namespace RTTIScanner.Impl
         /// <param name="process">The process to read from.</param>
         /// <param name="section">The section of the process.</param>
         /// <returns>The address of the pattern or <see cref="IntPtr.Zero"/> if the pattern was not found.</returns>
-        public static async Task<IntPtr> FindPatternAsync(BytePattern pattern, RemoteProcess process, Section section)
+        public static IntPtr FindPattern(BytePattern pattern, RemoteProcess process, Section section)
         {
             Contract.Requires(pattern != null);
             Contract.Requires(process != null);
             Contract.Requires(section != null);
 
-            return await FindPatternAsync(pattern, process, section.Start, section.Size.ToInt32());
+            return FindPattern(pattern, process, section.Start, section.Size.ToInt32());
         }
 
         /// <summary>
@@ -47,12 +47,12 @@ namespace RTTIScanner.Impl
         /// <param name="start">The start address.</param>
         /// <param name="size">The size of the address range.</param>
         /// <returns>The address of the pattern or <see cref="IntPtr.Zero"/> if the pattern was not found.</returns>
-        public static async Task<IntPtr> FindPatternAsync(BytePattern pattern, RemoteProcess process, IntPtr start, int size)
+        public static IntPtr FindPattern(BytePattern pattern, RemoteProcess process, IntPtr start, int size)
         {
             Contract.Requires(pattern != null);
             Contract.Requires(process != null);
 
-            var moduleBytes = await process.ReadRemoteMemoryAsync(start, size);
+            var moduleBytes = process.ReadRemoteMemory(start, size);
 
             var offset = FindPattern(pattern, moduleBytes);
             if (offset == -1)

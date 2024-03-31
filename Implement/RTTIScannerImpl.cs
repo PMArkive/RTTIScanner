@@ -4,16 +4,15 @@ using System.Drawing;
 using System.Reflection;
 using System.Windows.Forms;
 using RTTIScanner.ClassExtensions;
-using RTTIScanner.Implement;
 
 
-namespace RTTIScanner.Impl
+namespace RTTIScanner.Implement
 {
     [Command(PackageIds.Window)]
     internal sealed class RTTIScannerImpl : BaseCommand<RTTIScannerImpl>
     {
         private TextBox AddressInputBox;
-        private TextBox RTTIShowBox;
+        private static TextBox RTTIShowBox;
         private Form toolWindow;
 
         protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
@@ -75,6 +74,8 @@ namespace RTTIScanner.Impl
                     return;
                 }
 
+                RemoteProcess.Instance.currentProcess ??= await RemoteProcess.Instance.GetCurrentDebugProcessAsync();
+
                 // 不是断点模式的话CurrentProcess会一直为null, 很弱智
                 // 这里用来判断是不是在处理minidump
                 if (RemoteProcess.Instance.debugger.CurrentProcess != null)
@@ -86,10 +87,10 @@ namespace RTTIScanner.Impl
                     }
                 }
 
-                IntPtr pointer = await RemoteProcess.ParseAddressAsync(context);
+                IntPtr pointer = RemoteProcess.ParseAddress(context);
                 if (!pointer.MayBeValid())
                 {
-                    await VS.MessageBox.ShowWarningAsync("地址不合法!");
+                    ErrorResult($"Invalid Address");
                     return;
                 }
 
@@ -97,22 +98,22 @@ namespace RTTIScanner.Impl
 
                 try
                 {
-                    byte[] data = await RemoteProcess.Instance.ReadRemoteMemoryAsync(pointer, 8);
+                    byte[] data = RemoteProcess.Instance.ReadRemoteMemory(pointer, 8);
                     IntPtr remotePtr = (IntPtr)BitConverter.ToInt64(data, 0);
-                    rtti = await RTTIParser.ReadRemoteRuntimeTypeInformationAsync(remotePtr);
+                    rtti = RTTIParser.ReadRemoteRuntimeTypeInformation(remotePtr);
                     if (string.IsNullOrEmpty(rtti))
                     {
-                        await VS.MessageBox.ShowWarningAsync("获取RTTI信息失败!");
+                        ErrorResult($"Unknown Structure");
                         return;
                     }
                 }
                 catch (Exception ex)
                 {
-                    await VS.MessageBox.ShowWarningAsync($"Catched error reading process memory: {ex.Message}");
+                    ErrorResult($"Error reading process memory: {ex.Message}");
                     return;
                 }
 
-                string[] rttis = rtti.Split(separator: new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] rttis = rtti.Split(separator: new string[] { " : " }, StringSplitOptions.RemoveEmptyEntries);
                 RTTIShowBox.Clear();
                 foreach (string className in rttis)
                 {
@@ -124,14 +125,18 @@ namespace RTTIScanner.Impl
         private void RTTIShowBox_OnTextChanged(object sender, EventArgs e)
         {
             var preferredSize = RTTIShowBox.GetPreferredSize(new Size(int.MaxValue, int.MaxValue));
-
             toolWindow.Size = new Size(
-                Math.Max(toolWindow.Width, preferredSize.Width + 20), 
+                Math.Max(toolWindow.Width, preferredSize.Width + 30),
                 Math.Max(toolWindow.Height, preferredSize.Height + 20)
             );
         }
 
-        public void AppendResult(string text)
+        public static void ErrorResult(string text)
+        {
+            RTTIShowBox.Text = text;
+        }
+
+        public static void AppendResult(string text)
         {
             RTTIShowBox.Text += (RTTIShowBox.Text.Length > 0 ? Environment.NewLine : "") + text;
         }

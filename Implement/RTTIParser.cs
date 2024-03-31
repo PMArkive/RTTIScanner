@@ -1,27 +1,26 @@
 ﻿using RTTIScanner.ClassExtensions;
 using System.Diagnostics.Contracts;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace RTTIScanner.Impl
+namespace RTTIScanner.Implement
 {
     public class RTTIParser
     {
         // Reference: https://github.com/ReClassNET/ReClass.NET/blob/a02fcb9bd669c8f81facd3ee9ad57cdcbf2cc0e1/ReClass.NET/Memory/RemoteProcess.cs#L190
-        public static async Task<string> ReadRemoteRuntimeTypeInformationAsync(IntPtr address)
+        public static string ReadRemoteRuntimeTypeInformation(IntPtr address)
         {
             if (address.MayBeValid())
             {
                 try
                 {
                     string rtti = null;
-                    var objectLocatorPtr = await ReadRemoteIntPtrAsync(address - IntPtr.Size);
+                    var objectLocatorPtr = ReadRemoteIntPtr(address - IntPtr.Size);
                     if (objectLocatorPtr.MayBeValid())
                     {
 #if RTTISCANNER64
-                        rtti = await ReadRemoteRuntimeTypeInformation64Async(objectLocatorPtr);
+                        rtti = ReadRemoteRuntimeTypeInformation64(objectLocatorPtr);
 #else
-                        //rtti = ReadRemoteRuntimeTypeInformation32Async(objectLocatorPtr);
+                        //rtti = ReadRemoteRuntimeTypeInformation32(objectLocatorPtr);
 #endif
 
                     }
@@ -30,7 +29,7 @@ namespace RTTIScanner.Impl
                 }
                 catch (Exception ex)
                 {
-                    await VS.MessageBox.ShowWarningAsync($"Catched error reading process memory: {ex.Message}");
+                    RTTIScannerImpl.ErrorResult($"Catched error reading process memory: {ex.Message}");
                     return null;
                 }
             }
@@ -38,26 +37,26 @@ namespace RTTIScanner.Impl
             return null;
         }
 
-        public static async Task<string> ReadRemoteRuntimeTypeInformation64Async(IntPtr address)
+        public static string ReadRemoteRuntimeTypeInformation64(IntPtr address)
         {
             try
             {
                 if (address.MayBeValid())
                 {
-                    int baseOffset = await ReadRemoteInt32Async(address + 0x14);
+                    int baseOffset = ReadRemoteInt32(address + 0x14);
                     if (baseOffset != 0)
                     {
                         var baseAddress = address - baseOffset;
 
-                        var classHierarchyDescriptorOffset = await ReadRemoteInt32Async(address + 0x10);
+                        var classHierarchyDescriptorOffset = ReadRemoteInt32(address + 0x10);
                         if (classHierarchyDescriptorOffset != 0)
                         {
                             var classHierarchyDescriptorPtr = baseAddress + classHierarchyDescriptorOffset;
 
-                            var baseClassCount = await ReadRemoteInt32Async(classHierarchyDescriptorPtr + 0x08);
+                            var baseClassCount = ReadRemoteInt32(classHierarchyDescriptorPtr + 0x08);
                             if (baseClassCount > 0 && baseClassCount < 25)
                             {
-                                var baseClassArrayOffset = await ReadRemoteInt32Async(classHierarchyDescriptorPtr + 0x0C);
+                                var baseClassArrayOffset = ReadRemoteInt32(classHierarchyDescriptorPtr + 0x0C);
                                 if (baseClassArrayOffset != 0)
                                 {
                                     var baseClassArrayPtr = baseAddress + baseClassArrayOffset;
@@ -65,17 +64,17 @@ namespace RTTIScanner.Impl
                                     var sb = new StringBuilder();
                                     for (var i = 0; i < baseClassCount; ++i)
                                     {
-                                        var baseClassDescriptorOffset = await ReadRemoteInt32Async(baseClassArrayPtr + (4 * i));
+                                        var baseClassDescriptorOffset = ReadRemoteInt32(baseClassArrayPtr + (4 * i));
                                         if (baseClassDescriptorOffset != 0)
                                         {
                                             var baseClassDescriptorPtr = baseAddress + baseClassDescriptorOffset;
 
-                                            var typeDescriptorOffset = await ReadRemoteInt32Async(baseClassDescriptorPtr);
+                                            var typeDescriptorOffset = ReadRemoteInt32(baseClassDescriptorPtr);
                                             if (typeDescriptorOffset != 0)
                                             {
                                                 var typeDescriptorPtr = baseAddress + typeDescriptorOffset;
 
-                                                var name = await ReadRemoteStringUntilFirstNullCharacterAsync(typeDescriptorPtr + 0x14, Encoding.UTF8, 60);
+                                                var name = ReadRemoteStringUntilFirstNullCharacter(typeDescriptorPtr + 0x14, Encoding.UTF8, 60);
                                                 if (string.IsNullOrEmpty(name))
                                                 {
                                                     break;
@@ -110,67 +109,67 @@ namespace RTTIScanner.Impl
             }
             catch (Exception ex)
             {
-                await VS.MessageBox.ShowWarningAsync($"Catched error reading process memory: {ex.Message}");
+                RTTIScannerImpl.ErrorResult($"Catched error reading process memory: {ex.Message}");
                 return null;
             }
 
             return null;
         }
 
-        public static async Task<IntPtr> ReadRemoteIntPtrAsync(IntPtr address)
+        public static IntPtr ReadRemoteIntPtr(IntPtr address)
         {
             try
             {
 #if RTTISCANNER64
-                return (IntPtr)await ReadRemoteInt64Async(address);
+                return (IntPtr)ReadRemoteInt64(address);
 #else
-                return (IntPtr)await ReadRemoteInt32Async(address);
+                return (IntPtr)ReadRemoteInt32(address);
 #endif
             }
             catch (Exception ex)
             {
-                await VS.MessageBox.ShowWarningAsync($"Catched error reading process memory: {ex.Message}");
+                RTTIScannerImpl.ErrorResult($"Catched error reading process memory: {ex.Message}");
                 return IntPtr.Zero;
             }
         }
 
-        public static async Task<long> ReadRemoteInt64Async(IntPtr address)
+        public static long ReadRemoteInt64(IntPtr address)
         {
             try
             {
-                var data = await RemoteProcess.Instance.ReadRemoteMemoryAsync(address, sizeof(long));
+                var data = RemoteProcess.Instance.ReadRemoteMemory(address, sizeof(long));
 
                 return BitConverter.ToInt64(data, 0);
             }
             catch (Exception ex)
             {
-                await VS.MessageBox.ShowWarningAsync($"Catched error reading process memory: {ex.Message}");
+                RTTIScannerImpl.ErrorResult($"Catched error reading process memory: {ex.Message}");
                 return 0;
             }
         }
 
-        public static async Task<int> ReadRemoteInt32Async(IntPtr address)
+        public static int ReadRemoteInt32(IntPtr address)
         {
             try
             {
-                var data = await RemoteProcess.Instance.ReadRemoteMemoryAsync(address, sizeof(int));
+                var data = RemoteProcess.Instance.ReadRemoteMemory(address, sizeof(int));
 
                 return BitConverter.ToInt32(data, 0);
             }
             catch (Exception ex)
             {
-                await VS.MessageBox.ShowWarningAsync($"Catched error reading process memory: {ex.Message}");
+                RTTIScannerImpl.ErrorResult($"Catched error reading process memory: {ex.Message}");
                 return 0;
             }
         }
 
-        public static async Task<string> ReadRemoteStringUntilFirstNullCharacterAsync(IntPtr address, Encoding encoding, int length)
+        public static string ReadRemoteStringUntilFirstNullCharacter(IntPtr address, Encoding encoding, int length)
         {
             Contract.Requires(encoding != null);
             Contract.Requires(length >= 0);
             Contract.Ensures(Contract.Result<string>() != null);
 
-            var data = await RemoteProcess.Instance.ReadRemoteMemoryAsync(address, length * encoding.GuessByteCountPerChar());
+            var data = RemoteProcess.Instance.ReadRemoteMemory(address, length * encoding.GuessByteCountPerChar());
 
             // TODO We should cache the pattern per encoding.
             var index = PatternScanner.FindPattern(BytePattern.From(new byte[encoding.GuessByteCountPerChar()]), data);

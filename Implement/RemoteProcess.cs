@@ -1,19 +1,10 @@
-﻿using EnvDTE;
-using EnvDTE80;
-using Microsoft.Build.Framework.XamlTypes;
-using Microsoft.Diagnostics.Runtime;
-using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio.RpcContracts;
+﻿using EnvDTE80;
 using RTTIScanner.ClassExtensions;
-using RTTIScanner.Implement;
-using System;
-using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Process = System.Diagnostics.Process;
 
-namespace RTTIScanner.Impl
+namespace RTTIScanner.Implement
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct MEMORY_BASIC_INFORMATION
@@ -55,7 +46,7 @@ namespace RTTIScanner.Impl
             this.debugger = dte.Debugger;
         }
 
-        public async Task<byte[]> ReadRemoteMemoryAsync(IntPtr address, int size)
+        public byte[] ReadRemoteMemory(IntPtr address, int size)
         {
             if (!address.MayBeValid())
             {
@@ -64,14 +55,12 @@ namespace RTTIScanner.Impl
 
             if (MinidumpParser.Instance != null)
             {
-                return await MinidumpParser.Instance.ReadMemoryFromVSAsync(address, size);
+                return MinidumpParser.Instance.ReadMemoryFromVS(address, size);
             }
-
-            currentProcess ??= await GetCurrentDebugProcessAsync();
 
             if (currentProcess == null)
             {
-                await VS.MessageBox.ShowWarningAsync("当前进程为空!");
+                RTTIScannerImpl.ErrorResult("当前进程为空!");
                 return null;
             }
 
@@ -82,27 +71,27 @@ namespace RTTIScanner.Impl
                 MEMORY_BASIC_INFORMATION memInfo = new MEMORY_BASIC_INFORMATION();
                 if (NativeAPI.VirtualQueryEx(currentProcess.Handle, address, out memInfo, (uint)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION))) == 0)
                 {
-                    await VS.MessageBox.ShowWarningAsync($"VirtualQueryEx failed!. Error reading process memory");
+                    RTTIScannerImpl.ErrorResult($"VirtualQueryEx failed!. Error reading process memory");
                     return null;
                 }
 
                 if (!NativeAPI.ReadProcessMemory(currentProcess.Handle, address, data, size, out bytesRead))
                 {
                     int errorCode = Marshal.GetLastWin32Error();
-                    await VS.MessageBox.ShowWarningAsync($"ReadProcessMemory failed!. Error reading process memory: {errorCode}");
+                    RTTIScannerImpl.ErrorResult($"ReadProcessMemory failed!. Error reading process memory: {errorCode}");
                     return null;
                 }
             }
             catch (Exception ex)
             {
-                await VS.MessageBox.ShowWarningAsync($"Catched error reading process memory: {ex.Message}");
+                RTTIScannerImpl.ErrorResult($"Catched error reading process memory: {ex.Message}");
                 return null;
             }
 
             return data;
         }
 
-        private async Task<Process> GetCurrentDebugProcessAsync()
+        public async Task<Process> GetCurrentDebugProcessAsync()
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
@@ -123,7 +112,7 @@ namespace RTTIScanner.Impl
                     }
                     catch (Exception ex)
                     {
-                        await VS.MessageBox.ShowWarningAsync($"Catched error getting process by id: {ex.Message}");
+                        RTTIScannerImpl.ErrorResult($"Catched error getting process by id: {ex.Message}");
                         return null;
                     }
                 }
@@ -132,7 +121,7 @@ namespace RTTIScanner.Impl
             return null;
         }
 
-        public static async Task<IntPtr> ParseAddressAsync(string addressString)
+        public static IntPtr ParseAddress(string addressString)
         {
             // 从字符串中解析地址
             if (addressString.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
@@ -144,19 +133,9 @@ namespace RTTIScanner.Impl
             {
                 return new IntPtr(long.Parse(addressString, System.Globalization.NumberStyles.HexNumber));
             }
-            catch (FormatException ex)
-            {
-                await VS.MessageBox.ShowWarningAsync($"Error parsing address: {ex.Message}");
-                return IntPtr.Zero;
-            }
-            catch (OverflowException ex)
-            {
-                await VS.MessageBox.ShowWarningAsync($"Error parsing address: {ex.Message}");
-                return IntPtr.Zero;
-            }
             catch (Exception ex)
             {
-                await VS.MessageBox.ShowWarningAsync($"Error parsing address: {ex.Message}");
+                RTTIScannerImpl.ErrorResult($"Error parsing address: {ex.Message}");
                 return IntPtr.Zero;
             }
         }
