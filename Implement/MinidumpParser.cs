@@ -10,6 +10,11 @@ namespace RTTIScanner.Implement
         public async Task<byte[]> ReadMemoryFromVSAsync(IntPtr pointer, int size)
         {
             string expression = "0x" + pointer.ToString("X");
+            if (DebuggerIfaces.Instance.mainThread == null)
+            {
+                await VS.MessageBox.ShowWarningAsync("获取主线程失败!");
+                return null;
+            }
 
             IDebugStackFrame2 debugStackFrame = GetTopStackFrame(DebuggerIfaces.Instance.mainThread);
             if (debugStackFrame == null)
@@ -43,6 +48,12 @@ namespace RTTIScanner.Implement
             if (debugProperty.GetMemoryContext(out memoryContext) != VSConstants.S_OK)
             {
                 await VS.MessageBox.ShowWarningAsync("获取IDebugMemoryContext2失败!");
+                return null;
+            }
+
+            if (DebuggerIfaces.Instance.program == null)
+            {
+                await VS.MessageBox.ShowWarningAsync("获取program失败!");
                 return null;
             }
 

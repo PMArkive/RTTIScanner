@@ -14,7 +14,9 @@ namespace RTTIScanner
     [Guid(PackageGuids.RTTIScannerString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [InstalledProductRegistration(Vsix.Name, Vsix.Description, Vsix.Version)]
-    [ProvideAutoLoad(UIContextGuids80.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
+    [ProvideAutoLoad(UIContextGuids80.NoSolution)]
+    [ProvideAutoLoad(UIContextGuids80.SolutionBuilding)]
+    [ProvideAutoLoad(UIContextGuids80.Debugging)]
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     public sealed class RTTIScannerPackage : ToolkitPackage
     {
@@ -29,16 +31,11 @@ namespace RTTIScanner
             ErrorHandler.ThrowOnFailure(hr);
         }
 
-        public class DebugEventCallback : IVsDebuggerEvents, IDebugEventCallback2
+        public class DebugEventCallback : IDebugEventCallback2
         {
             public int Event(IDebugEngine2 engine, IDebugProcess2 process, IDebugProgram2 program, IDebugThread2 thread, IDebugEvent2 debugEvent, ref Guid riidEvent, uint attributes)
             {
                 DebuggerIfaces.Instance.Update(engine, process, program, thread, debugEvent);
-                return VSConstants.S_OK;
-            }
-
-            public int OnModeChange(DBGMODE dbgmodeNew)
-            {
                 return VSConstants.S_OK;
             }
         }

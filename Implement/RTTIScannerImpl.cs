@@ -69,7 +69,6 @@ namespace RTTIScanner.Impl
                     return;
                 }
 
-                // minidump和调试模式都会走进来.
                 if (RemoteProcess.Instance.debugger.CurrentMode == dbgDebugMode.dbgDesignMode)
                 {
                     await VS.MessageBox.ShowWarningAsync("调试器没有启动!");
