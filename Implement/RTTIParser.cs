@@ -7,6 +7,7 @@ namespace RTTIScanner.Impl
 {
     public class RTTIParser
     {
+        // Reference: https://github.com/ReClassNET/ReClass.NET/blob/a02fcb9bd669c8f81facd3ee9ad57cdcbf2cc0e1/ReClass.NET/Memory/RemoteProcess.cs#L190
         public static async Task<string> ReadRemoteRuntimeTypeInformationAsync(IntPtr address)
         {
             if (address.MayBeValid())
