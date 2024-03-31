@@ -4,5 +4,9 @@
 
 # Feature
 
-* Scan RTTI in normal debug mode.
-* Analyze RTTI while visual studio debuging minidump file.
+* Scan RTTI on visual studio debugging.
+* Analyze RTTI while visual studio debugging minidump file.
+
+# Warning
+
+* 32Bit debugging not support yet. (i have no interest in it)
