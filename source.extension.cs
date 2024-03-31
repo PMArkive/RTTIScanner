@@ -11,7 +11,7 @@ namespace RTTIScanner
         public const string Name = "RTTIScanner";
         public const string Description = @"A visual studio extension that scans the RTTI of given memory.";
         public const string Language = "en-US";
-        public const string Version = "1.1";
+        public const string Version = "1.2";
         public const string Author = "Anie1337";
         public const string Tags = "";
     }
