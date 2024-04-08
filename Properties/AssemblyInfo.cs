@@ -1,4 +1,4 @@
-﻿using RTTIScanner;
+﻿using RTTIScanner.vsix;
 using System.Reflection;
 using System.Runtime.InteropServices;
 

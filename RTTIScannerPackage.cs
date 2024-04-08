@@ -6,6 +6,7 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Debugger.Interop;
 using Microsoft.VisualStudio.Shell.Interop;
 using RTTIScanner.Implement;
+using RTTIScanner.vsix;
 using System.Runtime.InteropServices;
 using System.Threading;
 

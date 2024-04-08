@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Reflection;
 using System.Windows.Forms;
 using RTTIScanner.ClassExtensions;
+using RTTIScanner.vsix;
 
 
 namespace RTTIScanner.Implement
