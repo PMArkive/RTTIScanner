@@ -89,14 +89,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="vsix\source.extension.vsixmanifest">
+      <SubType>Designer</SubType>
       <Generator>VsixManifestGenerator</Generator>
       <LastGenOutput>source.extension.cs</LastGenOutput>
     </None>
-    <Content Include="vsix\VSCommandTable.vsct">
+    <VSCTCompile Include="vsix\VSCommandTable.vsct">
+      <ResourceName>Menus.ctmenu</ResourceName>
       <Generator>VsctGenerator</Generator>
       <LastGenOutput>VSCommandTable.cs</LastGenOutput>
+    </VSCTCompile>
+    <Content Include="vsix\Monikers.imagemanifest">
+      <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <None Include="vsix\Monikers.imagemanifest" />
     <Resource Include="Resources\ReClass.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
