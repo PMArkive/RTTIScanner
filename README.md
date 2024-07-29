@@ -10,3 +10,4 @@
 # Warning
 
 * 32Bit debugging not support yet. (i have no interest in it)
+* Linux not support yet
