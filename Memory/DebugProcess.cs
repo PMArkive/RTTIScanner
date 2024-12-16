@@ -44,7 +44,7 @@ namespace RTTIScanner.Memory
 				throw new Exception("ProcessName is null");
 			}
 
-			return processName.EndsWith(".exe") ? OSPlatform.Windows : OSPlatform.Linux;
+			return (processName.EndsWith(".exe") || processName.EndsWith(".mdmp")) ? OSPlatform.Windows : OSPlatform.Linux;
 		}
 
 		public virtual async Task<byte[]> ReadMemory(IntPtr address, int size)
