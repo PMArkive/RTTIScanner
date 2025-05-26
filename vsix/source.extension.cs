@@ -15,5 +15,6 @@ namespace RTTIScanner.vsix
         public const string Version = "1.3.2";
         public const string Author = "Anie1337";
         public const string Tags = "";
+        public const bool IsPreview = false;
     }
 }
