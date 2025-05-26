@@ -30,7 +30,7 @@ namespace RTTIScanner.RTTI
 						var classHierarchyDescriptorPtr = baseAddress + classHierarchyDescriptorOffset;
 
 						var baseClassCount = await ReadRemoteInt32(classHierarchyDescriptorPtr + 0x08);
-						if (baseClassCount > 0 && baseClassCount < 25)
+						if (baseClassCount > 0)
 						{
 							var baseClassArrayOffset = await ReadRemoteInt32(classHierarchyDescriptorPtr + 0x0C);
 							if (baseClassArrayOffset != 0)
@@ -50,7 +50,7 @@ namespace RTTIScanner.RTTI
 										{
 											var typeDescriptorPtr = baseAddress + typeDescriptorOffset;
 
-											var name = await ReadRemoteStringUntilFirstNullCharacter(typeDescriptorPtr + 0x14, Encoding.UTF8, 60);
+											var name = await ReadRemoteString(typeDescriptorPtr + 0x14);
 											if (string.IsNullOrEmpty(name))
 											{
 												break;
@@ -88,31 +88,6 @@ namespace RTTIScanner.RTTI
 			}
 
 			return null;
-		}
-
-		public async Task<string> ReadRemoteStringUntilFirstNullCharacter(IntPtr address, Encoding encoding, int length)
-		{
-			Contract.Requires(encoding != null);
-			Contract.Requires(length >= 0);
-			Contract.Ensures(Contract.Result<string>() != null);
-
-			var data = await Memory.Reader.GetInstance().GetBytes(address, length * encoding.GuessByteCountPerChar());
-
-			// TODO We should cache the pattern per encoding.
-			var index = PatternScanner.FindPattern(BytePattern.From(new byte[encoding.GuessByteCountPerChar()]), data);
-			if (index == -1)
-			{
-				index = data.Length;
-			}
-
-			try
-			{
-				return encoding.GetString(data, 0, Math.Min(index, data.Length));
-			}
-			catch
-			{
-				return string.Empty;
-			}
 		}
 
 		public string UndecorateSymbolName(string name)

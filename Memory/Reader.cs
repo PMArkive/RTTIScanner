@@ -43,7 +43,7 @@ namespace RTTIScanner.Memory
 		{
 			if (typeof(T) == typeof(string))
 			{
-				byte[] buffer = await GetBytes(pointer + offset, 60);
+				byte[] buffer = await GetBytes(pointer + offset, 256);
 				if (buffer == null)
 				{
 					return default;
